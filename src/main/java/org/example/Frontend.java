@@ -8,41 +8,42 @@ import java.io.File;
 public class Frontend {
 
     private final JFrame frame;
-    private final JLabel selectedFilePathLabel;
     private final JTextArea resultsArea;
     private final JButton annotateButton;
 
     public Frontend() {
         // --- Frame Setup ---
-        frame = new JFrame("Image Annotator");
+        frame = new JFrame("Plant Identification App");
         frame.setSize(600, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout(10, 10));
 
-        // --- Top Panel for File Selection ---
-        JPanel topPanel = new JPanel(new BorderLayout(10, 5));
-        topPanel.setBorder(BorderFactory.createTitledBorder("1. Select an Image File"));
+        // --- Top Panel for File Selection and Photo ---
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        topPanel.setBorder(BorderFactory.createTitledBorder("Select an option"));
 
-        selectedFilePathLabel = new JLabel("No image selected...", SwingConstants.CENTER);
-        selectedFilePathLabel.setFont(new Font("SansSerif", Font.ITALIC, 12));
-        topPanel.add(selectedFilePathLabel, BorderLayout.CENTER);
 
-        JButton browseButton = new JButton("Browse...");
+
+        JButton browseButton = new JButton("Pick a picture");
         browseButton.addActionListener(e -> openFileChooser());
         topPanel.add(browseButton, BorderLayout.WEST);
 
+        JButton photoButton = new JButton("Take a photo");
+        photoButton.addActionListener(e -> System.out.println("Not Implemented"));//Need to implement photo
+        topPanel.add(photoButton, BorderLayout.EAST);
+
         // --- Bottom Panel for Results and Action ---
         JPanel bottomPanel = new JPanel(new BorderLayout(10, 10));
-        bottomPanel.setBorder(BorderFactory.createTitledBorder("2. Annotate and View Results"));
+        bottomPanel.setBorder(BorderFactory.createTitledBorder("Results"));
 
-        resultsArea = new JTextArea("Annotation results will appear here.");
+        resultsArea = new JTextArea("Results");
         resultsArea.setEditable(false);
         resultsArea.setLineWrap(true);
         resultsArea.setWrapStyleWord(true);
         JScrollPane scrollPane = new JScrollPane(resultsArea);
         bottomPanel.add(scrollPane, BorderLayout.CENTER);
 
-        annotateButton = new JButton("Annotate Image");
+        annotateButton = new JButton("Find plant");
         annotateButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         annotateButton.setEnabled(false); // Disabled until a file is chosen
         bottomPanel.add(annotateButton, BorderLayout.SOUTH);
@@ -75,7 +76,6 @@ public class Frontend {
 
     private void prepareForAnnotation(File imageFile) {
         String path = imageFile.getAbsolutePath();
-        selectedFilePathLabel.setText(path);
         resultsArea.setText("Ready to annotate '" + imageFile.getName() + "'.");
         annotateButton.setEnabled(true);
 
