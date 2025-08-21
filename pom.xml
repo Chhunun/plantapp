@@ -53,7 +53,7 @@
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <!-- This sets the main class to run when the JAR is executed -->
-                  <mainClass>org.example.Frontend</mainClass>
+                  <mainClass>Frontend</mainClass>
                 </transformer>
               </transformers>
             </configuration>
