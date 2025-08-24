@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Plant Identifier</title>
+    <style>
+        /* Simple CSS to replace hgap/vgap and make it look nice */
+        body { font-family: sans-serif; max-width: 600px; margin: 2em auto; }
+        .form-container { display: flex; gap: 10px; align-items: center; }
+        #results { margin-top: 20px; background-color: #f0f0f0; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<h1>Plant Identifier</h1>
+<p>Pick a picture of a plant to identify it.</p>
+
+<!-- This form replaces your JFileChooser and buttons -->
+<div class="form-container">
+    <!-- The 'name="imageFile"' MUST match the @RequestParam in your Java code -->
+    <input type="file" id="imageFileInput" name="imageFile" accept="image/*">
+    <button id="uploadButton">Analyze Picture</button>
+</div>
+
+<!-- This div is where we will display the results from the server -->
+<div id="results">
+    <p>Results will appear here...</p>
+</div>
+
+<!-- JavaScript to connect the button to the backend -->
+<script>
+    const uploadButton = document.getElementById('uploadButton');
+    const imageInput = document.getElementById('imageFileInput');
+    const resultsDiv = document.getElementById('results');
+
+    uploadButton.addEventListener('click', async () => {
+        if (imageInput.files.length === 0) {
+            alert('Please select a file first!');
+            return;
+        }
+
+        resultsDiv.innerHTML = '<p>Analyzing, please wait...</p>';
+
+        // FormData is the web equivalent of packaging up data to send
+        const formData = new FormData();
+        formData.append('imageFile', imageInput.files[0]);
+
+        // 'fetch' is the modern JavaScript way to make an HTTP request
+        try {
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+
+            // The server sends back JSON, which we parse into a JavaScript array
+            const labels = await response.json();
+
+            // Display the results
+            resultsDiv.innerHTML = '<h3>Analysis Results:</h3>';
+            const ul = document.createElement('ul');
+            labels.forEach(label => {
+                const li = document.createElement('li');
+                li.textContent = label;
+                ul.appendChild(li);
+            });
+            resultsDiv.appendChild(ul);
+
+        } catch (error) {
+            resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            console.error('Error during analysis:', error);
+        }
+    });
+</script>
+
+</body>
+</html>

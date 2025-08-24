@@ -1,3 +1,5 @@
+import com.plantapp.ImageAnnotate;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -129,11 +131,21 @@ public class Frontend {
     }
 
     public static void main(String[] args) {
-        // It's best practice to create and show Swing GUIs on the Event Dispatch Thread (EDT).
+        // This code runs on the main thread.
 
+        // Now, we schedule a task to be run on the Event Dispatch Thread (EDT).
         SwingUtilities.invokeLater(() -> {
+            // Everything inside this lambda expression will be executed
+            // safely on the EDT.
+
+            // 1. Create the UI components
             Frontend frontend = new Frontend();
+
+            // 2. Make the UI visible
             frontend.show();
         });
+
+        // The main thread can now exit, but the application keeps running
+        // because the EDT is active.
     }
 }

@@ -1,3 +1,5 @@
+package com.plantapp;
+
 import com.google.cloud.vision.v1.*;
 import com.google.protobuf.ByteString;
 

@@ -1,64 +1,65 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.example</groupId>
-  <artifactId>image-annotator</artifactId>
+  <!-- 1. ADD THE SPRING BOOT PARENT -->
+  <!-- This manages versions for common dependencies and provides sensible defaults. -->
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <!-- I'm using a recent, stable version of Spring Boot. You can adjust this. -->
+    <version>3.2.5</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+
+  <!-- I've updated these to be more descriptive for a web app, but you can keep your old ones. -->
+  <groupId>com.plantapp</groupId>
+  <artifactId>plant-app-web</artifactId>
   <version>1.0.0</version>
-  <packaging>jar</packaging>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <!-- Spring Boot prefers this property name for the Java version -->
+    <java.version>17</java.version>
   </properties>
 
   <dependencies>
-    <!-- Google Cloud Vision API -->
+    <!-- 2. ADD THE SPRING BOOT WEB STARTER -->
+    <!-- This single dependency includes everything for a web app:
+         - Spring MVC for controllers (@RestController, etc.)
+         - An embedded Tomcat server so you don't need to configure one
+         - And much more.
+    -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- Keep your Google Cloud Vision dependency. It's still needed. -->
     <dependency>
       <groupId>com.google.cloud</groupId>
       <artifactId>google-cloud-vision</artifactId>
       <version>3.15.0</version>
     </dependency>
 
-    <!-- JUnit 5 for testing -->
+    <!-- 3. USE THE SPRING BOOT TEST STARTER -->
+    <!-- This replaces the plain JUnit dependency and includes more testing tools like Mockito. -->
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>5.9.2</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <!-- 4. REPLACE THE SHADE PLUGIN WITH THE SPRING BOOT PLUGIN -->
+      <!-- This plugin creates the executable JAR in the special Spring Boot format.
+           It automatically finds your main class with the @SpringBootApplication annotation,
+           so you don't need to configure it like you did with the shade plugin. -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
-      </plugin>
-      <!-- Plugin to create a single executable "fat JAR" with all dependencies -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.4.1</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <!-- This sets the main class to run when the JAR is executed -->
-                  <mainClass>Frontend</mainClass>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
