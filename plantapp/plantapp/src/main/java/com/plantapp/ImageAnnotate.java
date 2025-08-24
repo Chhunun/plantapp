@@ -2,6 +2,7 @@ package com.plantapp;
 
 import com.google.cloud.vision.v1.*;
 import com.google.protobuf.ByteString;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,20 +15,16 @@ import java.util.stream.Collectors;
 public class ImageAnnotate {
 
     /**
-     * Detects labels in a local image file using the Google Cloud Vision API.
+     * Analyzes an image from a byte array and returns a list of labels.
      *
-     * @param filePath The path to the local file to analyze.
-     * @return A formatted string of detected labels and their scores.
-     * @throws IOException If the file cannot be read or there's an API error.
+     * @param imageBytes The raw byte data of the image.
+     * @return A List of strings, where each string is a detected label.
+     * @throws IOException If there's an API communication error.
      */
-    public String detectLabels(String filePath) throws IOException {
+    public List<String> analyzeImage(byte[] imageBytes) throws IOException {
         // Initialize a client in a try-with-resources block to ensure it's closed automatically.
         try (ImageAnnotatorClient vision = ImageAnnotatorClient.create()) {
-
-            // Read the image file into a byte string
-            Path path = Paths.get(filePath);
-            byte[] data = Files.readAllBytes(path);
-            ByteString imgBytes = ByteString.copyFrom(data);
+            ByteString imgBytes = ByteString.copyFrom(imageBytes);
 
             // Builds the image annotation request
             List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -41,29 +38,46 @@ public class ImageAnnotate {
             BatchAnnotateImagesResponse response = vision.batchAnnotateImages(requests);
             List<AnnotateImageResponse> responses = response.getResponsesList();
 
-            StringBuilder resultBuilder = new StringBuilder("Google Vision API Results:\n--------------------------\n");
-
+            // Processes the response and returns raw data
             for (AnnotateImageResponse res : responses) {
                 if (res.hasError()) {
-                    System.err.printf("Error: %s%n", res.getError().getMessage());
-                    return "Error analyzing image: " + res.getError().getMessage();
+                    // In a web app, it's better to throw an exception that the controller can handle
+                    throw new IOException("Error from Vision API: " + res.getError().getMessage());
                 }
 
-                if (res.getLabelAnnotationsList().isEmpty()) {
-                    resultBuilder.append("No labels detected for this image.");
-                } else {
-                    // Convert labels to a formatted string
-                    String labels = res.getLabelAnnotationsList().stream()
-                            .map(annotation -> String.format(
-                                    "- %s (%.2f%% score)",
-                                    annotation.getDescription(),
-                                    annotation.getScore() * 100
-                            ))
-                            .collect(Collectors.joining("\n"));
-                    resultBuilder.append(labels);
-                }
+                // Return a list of the label descriptions. The frontend will format them.
+                return res.getLabelAnnotationsList().stream()
+                        .map(annotation -> String.format(
+                                "%s (%.0f%%)", // Simplified format for the web
+                                annotation.getDescription(),
+                                annotation.getScore() * 100
+                        ))
+                        .collect(Collectors.toList());
             }
-            return resultBuilder.toString();
+
+            // Return an empty list if no responses are found (should be rare)
+            return new ArrayList<>();
         }
+
+    }
+    // This is to support the desktop application
+    public String detectLabels(String filePath) throws IOException {
+        // Read the file from the given path into a byte array
+        Path path = Paths.get(filePath);
+        byte[] data = Files.readAllBytes(path);
+
+        // Call the new, core method to get the raw labels
+        List<String> labels = analyzeImage(data);
+
+        // Format the raw list into the nice string that the JTextArea expects
+        if (labels.isEmpty()) {
+            return "No labels detected.";
+        }
+
+        StringBuilder resultBuilder = new StringBuilder("Detected Labels:\n\n");
+        for (String label : labels) {
+            resultBuilder.append("  • ").append(label).append("\n");
+        }
+        return resultBuilder.toString();
     }
 }

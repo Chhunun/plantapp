@@ -1,8 +1,12 @@
+package com.plantapp.controller;
+
+import com.plantapp.ImageAnnotate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 
@@ -20,7 +24,7 @@ public class VisionController {
 
         // Call your existing Vision API logic!
         // You would inject or create an instance of your VisionApi class here.
-        VisionApi visionApi = new VisionApi();
+        ImageAnnotate visionApi = new ImageAnnotate();
         List<String> labels = visionApi.analyzeImage(imageBytes);
 
         // The List of strings will be automatically converted to JSON and sent
